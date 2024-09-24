@@ -1,32 +1,25 @@
-import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 
 type User = {
-  id: number;
-  username: string;
+  id: string;
+  username: string; // ここはユーザー名のカラム名に合わせてください
 };
 
-export default function Home() {
-  const [users, setUsers] = useState<User[]>([]);
+async function fetchProfiles() {
+  const { data, error } = await supabase.from('users').select('*');
+  if (error) {
+    console.error('Error fetching profiles:', error);
+    return [];
+  }
+  return data;
+}
 
-  useEffect(() => {
-    const fetchProfiles = async () => {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*');
-      if (error) {
-        console.error('Error fetching profiles:', error);
-      } else {
-        setUsers(data);
-      }
-    };
-
-    fetchProfiles();
-  }, []);
+export default async function Home() {
+  const users: User[] = await fetchProfiles();
 
   return (
     <div>
-      <h1>自己紹介</h1>
+      <h1>Profiles</h1>
       <ul>
         {users.map(user => (
           <li key={user.id}>
